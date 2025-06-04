@@ -8,12 +8,16 @@ import { Navbar } from "@/components/navbar"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase/client"
 import { toast } from "@/hooks/use-toast"
+import { CheckoutModal } from "@/components/checkout-modal"
 
 export default function PlansPage() {
   const [loading, setLoading] = useState<{ [key: string]: boolean }>({
     forever: false,
     annual: false,
   })
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false)
+  const [selectedPlan, setSelectedPlan] = useState<"forever" | "annual" | null>(null)
+  const [userEmail, setUserEmail] = useState("")
   const router = useRouter()
 
   const handleSelectPlan = async (plan: "forever" | "annual") => {
@@ -25,35 +29,47 @@ export default function PlansPage() {
       } = await supabase.auth.getUser()
 
       if (!user) {
-        // If not logged in, redirect to login with plan info
-        router.push(`/login?plan=${plan}`)
+        // If not logged in, show checkout modal to collect email
+        setSelectedPlan(plan)
+        setShowCheckoutModal(true)
+        setLoading({ ...loading, [plan]: false })
         return
       }
 
-      // Update user's subscription plan
-      const { error } = await supabase
-        .from("users")
-        .update({
-          subscription_plan: plan,
-          subscription_start_date: new Date().toISOString(),
-          subscription_end_date:
-            plan === "annual" ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() : null,
-          max_images: plan === "forever" ? 8 : 4,
-          has_music: plan === "forever",
-          has_dynamic_background: plan === "forever",
-          has_exclusive_animations: plan === "forever",
+      // Check if user exists in our system
+      const { data: userData } = await supabase.from("users").select("*").eq("id", user.id).single()
+
+      if (userData) {
+        // User exists, update subscription plan
+        const { error } = await supabase
+          .from("users")
+          .update({
+            subscription_plan: plan,
+            subscription_start_date: new Date().toISOString(),
+            subscription_end_date:
+              plan === "annual" ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() : null,
+            max_images: plan === "forever" ? 8 : 4,
+            has_music: plan === "forever",
+            has_dynamic_background: plan === "forever",
+            has_exclusive_animations: plan === "forever",
+          })
+          .eq("id", user.id)
+
+        if (error) throw error
+
+        toast({
+          title: "Plano selecionado com sucesso!",
+          description: "Agora você pode criar sua página do amor.",
         })
-        .eq("id", user.id)
 
-      if (error) throw error
-
-      toast({
-        title: "Plano selecionado com sucesso!",
-        description: "Agora você pode criar sua página do amor.",
-      })
-
-      // Redirect to create page
-      router.push("/create")
+        // Redirect to create page
+        router.push("/create")
+      } else {
+        // User authenticated but not in our system, show checkout modal
+        setSelectedPlan(plan)
+        setUserEmail(user.email || "")
+        setShowCheckoutModal(true)
+      }
     } catch (error: any) {
       toast({
         title: "Erro ao selecionar plano",
@@ -62,6 +78,52 @@ export default function PlansPage() {
       })
     } finally {
       setLoading({ ...loading, [plan]: false })
+    }
+  }
+
+  const handleCheckoutSubmit = async (email: string, plan: "forever" | "annual") => {
+    try {
+      // Check if user exists in our system
+      const { data: existingUser } = await supabase
+        .from("users")
+        .select("id, email, subscription_plan")
+        .eq("email", email)
+        .single()
+
+      if (existingUser) {
+        // User exists, proceed with plan update (this would be handled by Stripe webhook in production)
+        toast({
+          title: "Usuário encontrado!",
+          description: "Redirecionando para o pagamento...",
+        })
+
+        // Here we would redirect to Stripe checkout
+        // For now, we'll simulate the process
+        console.log("Redirecting to Stripe for existing user:", email, plan)
+      } else {
+        // New user, create auth user first then proceed with payment
+        const { error } = await supabase.auth.signInWithOtp({
+          email,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback?plan=${plan}`,
+          },
+        })
+
+        if (error) throw error
+
+        toast({
+          title: "Link de verificação enviado!",
+          description: "Verifique seu e-mail para continuar com o pagamento.",
+        })
+      }
+
+      setShowCheckoutModal(false)
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      })
     }
   }
 
@@ -190,6 +252,15 @@ export default function PlansPage() {
           ))}
         </div>
       </div>
+
+      {/* Checkout Modal */}
+      <CheckoutModal
+        isOpen={showCheckoutModal}
+        onClose={() => setShowCheckoutModal(false)}
+        onSubmit={handleCheckoutSubmit}
+        selectedPlan={selectedPlan}
+        initialEmail={userEmail}
+      />
     </div>
   )
 }

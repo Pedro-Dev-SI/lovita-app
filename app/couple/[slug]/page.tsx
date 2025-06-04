@@ -8,8 +8,10 @@ import { Confetti } from "@/components/animations/confetti"
 import { Hearts } from "@/components/animations/hearts"
 import { isAnniversary } from "@/lib/utils/date"
 import { Card, CardContent } from "@/components/ui/card"
-import { MusicIcon, Camera, Heart } from "lucide-react"
+import { MusicIcon, Camera, Heart, Share2 } from "lucide-react"
 import { motion } from "framer-motion"
+import { Button } from "@/components/ui/button"
+import { QRCodeGenerator } from "@/components/qr-code-generator"
 
 interface CouplePageProps {
   params: {
@@ -23,6 +25,7 @@ export default function CouplePage({ params }: CouplePageProps) {
   const [memories, setMemories] = useState<Memory[]>([])
   const [loading, setLoading] = useState(true)
   const [anniversaryType, setAnniversaryType] = useState<"monthly" | "yearly" | null>(null)
+  const [showQR, setShowQR] = useState(false)
 
   useEffect(() => {
     const fetchPageData = async () => {
@@ -69,10 +72,36 @@ export default function CouplePage({ params }: CouplePageProps) {
     fetchPageData()
   }, [params.slug])
 
+  const handleShare = async () => {
+    const url = window.location.href
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${couplePage?.partner1_name} & ${couplePage?.partner2_name}`,
+          text: "Veja nossa página do amor!",
+          url: url,
+        })
+      } catch (error) {
+        console.log("Error sharing:", error)
+      }
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(url)
+      alert("Link copiado para a área de transferência!")
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#20231F] via-[#82181C] to-[#B61862] flex items-center justify-center">
-        <div className="text-white">Carregando página do amor...</div>
+        <motion.div
+          animate={{ scale: [1, 1.1, 1] }}
+          transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
+          className="text-white text-center"
+        >
+          <Heart className="w-12 h-12 mx-auto mb-4 fill-white" />
+          <div>Carregando página do amor...</div>
+        </motion.div>
       </div>
     )
   }
@@ -120,12 +149,33 @@ export default function CouplePage({ params }: CouplePageProps) {
         </div>
       )}
 
+      {/* Share Button */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 1 }}
+        className="fixed top-4 right-4 z-50"
+      >
+        <Button
+          onClick={handleShare}
+          className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border border-white/30 rounded-full"
+          size="sm"
+        >
+          <Share2 className="w-4 h-4 mr-2" />
+          Compartilhar
+        </Button>
+      </motion.div>
+
       <div className="relative z-10 container mx-auto px-4 py-8">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
+          <motion.h1
+            className="text-4xl md:text-6xl font-bold text-white mb-4"
+            animate={{ scale: [1, 1.02, 1] }}
+            transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
+          >
             {couplePage.partner1_name} & {couplePage.partner2_name}
-          </h1>
+          </motion.h1>
           <p className="text-xl text-white/80">
             Juntos desde {new Date(couplePage.relationship_start_date).toLocaleDateString("pt-BR")}
           </p>
@@ -194,7 +244,8 @@ export default function CouplePage({ params }: CouplePageProps) {
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: 0.1 * index }}
-                      className="aspect-square rounded-lg overflow-hidden bg-white/5"
+                      whileHover={{ scale: 1.05 }}
+                      className="aspect-square rounded-lg overflow-hidden bg-white/5 cursor-pointer group"
                     >
                       {memory.media_url && (
                         <>
@@ -202,7 +253,7 @@ export default function CouplePage({ params }: CouplePageProps) {
                             <img
                               src={memory.media_url || "/placeholder.svg"}
                               alt={memory.title || "Memória"}
-                              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                             />
                           ) : (
                             <video src={memory.media_url} className="w-full h-full object-cover" controls />
@@ -210,8 +261,8 @@ export default function CouplePage({ params }: CouplePageProps) {
                         </>
                       )}
                       {memory.title && (
-                        <div className="p-2">
-                          <p className="text-white text-sm font-medium">{memory.title}</p>
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/50 backdrop-blur-sm p-2">
+                          <p className="text-white text-sm font-medium truncate">{memory.title}</p>
                           {memory.memory_date && (
                             <p className="text-white/60 text-xs">
                               {new Date(memory.memory_date).toLocaleDateString("pt-BR")}
@@ -227,14 +278,41 @@ export default function CouplePage({ params }: CouplePageProps) {
           </motion.div>
         )}
 
+        {/* QR Code Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+          className="mt-12 text-center"
+        >
+          <Button
+            onClick={() => setShowQR(!showQR)}
+            variant="outline"
+            className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 mb-6"
+          >
+            {showQR ? "Ocultar" : "Mostrar"} QR Code
+          </Button>
+
+          {showQR && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="inline-block"
+            >
+              <QRCodeGenerator url={window.location.href} size={200} />
+            </motion.div>
+          )}
+        </motion.div>
+
         {/* Footer */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
+          transition={{ delay: 1 }}
           className="text-center mt-12 text-white/60"
         >
           <p>Feito com ❤️ para celebrar o amor</p>
+          <p className="text-sm mt-2">Crie sua própria página em lovita.com</p>
         </motion.div>
       </div>
     </div>

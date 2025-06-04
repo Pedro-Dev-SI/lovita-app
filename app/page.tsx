@@ -104,7 +104,7 @@ export default function HomePage() {
                 size="lg"
                 className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-full px-8 py-4 text-lg font-medium shadow-xl hover:shadow-2xl transition-all duration-300"
               >
-                <Link href="/plans">
+                <Link href="#plans">
                   <Heart className="w-5 h-5 mr-2 fill-white" />
                   Criar nossa página
                   <ArrowRight className="w-5 h-5 ml-2" />
@@ -210,7 +210,7 @@ export default function HomePage() {
       </section>
 
       {/* Plans Section */}
-      <section className="py-20 bg-white relative overflow-hidden">
+      <section id="plans" className="py-20 bg-white relative overflow-hidden">
         {/* Background decoration */}
         <div className="absolute inset-0 bg-gradient-to-br from-pink-50/50 to-purple-50/50" />
 

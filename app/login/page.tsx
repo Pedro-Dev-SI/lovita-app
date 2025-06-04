@@ -13,11 +13,14 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { toast } from "@/hooks/use-toast"
 import Link from "next/link"
 import { Navbar } from "@/components/navbar"
+import { UserNotFoundModal } from "@/components/user-not-found-modal"
+import { motion } from "framer-motion"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
+  const [showUserNotFoundModal, setShowUserNotFoundModal] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
   const plan = searchParams?.get("plan")
@@ -44,12 +47,58 @@ export default function LoginPage() {
     checkUser()
   }, [router])
 
+  const checkUserExists = async (email: string) => {
+    try {
+      // First check if user exists in our users table
+      const { data: userData, error } = await supabase
+        .from("users")
+        .select("id, email, subscription_plan, subscription_end_date")
+        .eq("email", email)
+        .single()
+
+      if (error && error.code !== "PGRST116") {
+        // PGRST116 is "not found" error, other errors should be thrown
+        throw error
+      }
+
+      if (!userData) {
+        // User doesn't exist in our system
+        return { exists: false, hasActivePlan: false }
+      }
+
+      // Check if user has an active plan
+      const hasActivePlan =
+        userData.subscription_plan !== "none" &&
+        (userData.subscription_plan === "forever" ||
+          (userData.subscription_end_date && new Date(userData.subscription_end_date) > new Date()))
+
+      return {
+        exists: true,
+        hasActivePlan,
+        userData,
+      }
+    } catch (error) {
+      console.error("Error checking user:", error)
+      return { exists: false, hasActivePlan: false }
+    }
+  }
+
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
     try {
-      // Determine redirect URL based on whether a plan was selected
+      // Check if user exists and has active plan
+      const { exists, hasActivePlan } = await checkUserExists(email)
+
+      if (!exists || !hasActivePlan) {
+        // Show modal for user not found or no active plan
+        setShowUserNotFoundModal(true)
+        setLoading(false)
+        return
+      }
+
+      // User exists and has active plan, proceed with magic link
       const redirectTo = plan
         ? `${window.location.origin}/auth/callback?plan=${plan}`
         : `${window.location.origin}/auth/callback`
@@ -79,6 +128,16 @@ export default function LoginPage() {
     }
   }
 
+  const handleModalClose = () => {
+    setShowUserNotFoundModal(false)
+  }
+
+  const handleGoToPlans = () => {
+    setShowUserNotFoundModal(false)
+    // Scroll to plans section on homepage
+    router.push("/#plans")
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -95,16 +154,26 @@ export default function LoginPage() {
 
           <Card className="bg-white shadow-xl border-0">
             <CardHeader className="text-center pb-8">
-              <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <motion.div
+                animate={{
+                  rotate: [0, 10, -10, 0],
+                  scale: [1, 1.1, 1],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Number.POSITIVE_INFINITY,
+                }}
+                className="w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6"
+              >
                 <Heart className="w-8 h-8 text-white fill-white" />
-              </div>
+              </motion.div>
               <CardTitle className="text-2xl font-bold text-gray-900">
                 {emailSent ? "Verifique seu e-mail" : "Acesse sua conta"}
               </CardTitle>
               <CardDescription className="text-gray-600 text-base">
                 {emailSent
                   ? "Enviamos um link mágico para seu e-mail. Clique no link para fazer login."
-                  : "Entre com seu e-mail para acessar ou criar sua página do amor"}
+                  : "Entre com seu e-mail para acessar sua página do amor"}
               </CardDescription>
             </CardHeader>
 
@@ -132,20 +201,27 @@ export default function LoginPage() {
                     disabled={loading}
                   >
                     {loading ? (
-                      "Enviando..."
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+                        className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"
+                      />
                     ) : (
-                      <>
-                        <Mail className="w-5 h-5 mr-2" />
-                        Enviar link mágico
-                      </>
+                      <Mail className="w-5 h-5 mr-2" />
                     )}
+                    {loading ? "Verificando..." : "Enviar link mágico"}
                   </Button>
                 </form>
               ) : (
                 <div className="text-center space-y-6">
-                  <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 200 }}
+                    className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto"
+                  >
                     <Mail className="w-10 h-10 text-green-600" />
-                  </div>
+                  </motion.div>
 
                   <div className="space-y-2">
                     <p className="text-gray-600">
@@ -185,6 +261,14 @@ export default function LoginPage() {
           </Card>
         </div>
       </div>
+
+      {/* User Not Found Modal */}
+      <UserNotFoundModal
+        isOpen={showUserNotFoundModal}
+        onClose={handleModalClose}
+        onGoToPlans={handleGoToPlans}
+        email={email}
+      />
     </div>
   )
 }
