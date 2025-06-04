@@ -15,6 +15,7 @@ import { toast } from "@/hooks/use-toast"
 import { Heart, ArrowLeft, Music, Camera, Trash2 } from "lucide-react"
 import Link from "next/link"
 import type { CouplePage, User, Memory, Music as MusicType } from "@/lib/types"
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
 
 interface EditPageProps {
   params: {
@@ -52,6 +53,8 @@ export default function EditPage({ params }: EditPageProps) {
     spotify_url: "",
     is_primary: false,
   })
+
+  const [memoryImageFile, setMemoryImageFile] = useState<File | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -307,6 +310,63 @@ export default function EditPage({ params }: EditPageProps) {
     }
   }
 
+  const handleAddMemory = async () => {
+    if (!memoryImageFile || !couplePage || !user) return
+    if (!newMemory.title || !newMemory.memory_date) return
+
+    // Check subscription limits
+    if (memories.filter((m) => m.media_type === "image").length >= user.max_images) {
+      toast({
+        title: "Limite atingido",
+        description: `Seu plano permite no máximo ${user.max_images} imagens.`,
+        variant: "destructive",
+      })
+      return
+    }
+
+    setUploading(true)
+
+    try {
+      // Upload to Supabase Storage
+      const fileExt = memoryImageFile.name.split(".").pop()
+      const fileName = `${couplePage.id}/${Date.now()}.${fileExt}`
+      const { data: uploadData, error: uploadError } = await supabase.storage.from("memories").upload(fileName, memoryImageFile)
+      if (uploadError) throw uploadError
+      const { data: { publicUrl } } = supabase.storage.from("memories").getPublicUrl(fileName)
+      // Save to database
+      const { error: dbError } = await supabase.from("memories").insert({
+        couple_page_id: couplePage.id,
+        title: newMemory.title || "Nova memória",
+        description: newMemory.description,
+        media_url: publicUrl,
+        media_type: "image",
+        memory_date: newMemory.memory_date || new Date().toISOString().split("T")[0],
+      })
+      if (dbError) throw dbError
+      // Refresh memories
+      const { data: memoriesData } = await supabase
+        .from("memories")
+        .select("*")
+        .eq("couple_page_id", couplePage.id)
+        .order("memory_date", { ascending: false })
+      setMemories(memoriesData || [])
+      setNewMemory({ title: "", description: "", memory_date: "" })
+      setMemoryImageFile(null)
+      toast({
+        title: "Imagem adicionada!",
+        description: "A memória foi adicionada com sucesso.",
+      })
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      })
+    } finally {
+      setUploading(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -503,47 +563,72 @@ export default function EditPage({ params }: EditPageProps) {
                     id="memory-image"
                     type="file"
                     accept="image/*"
-                    onChange={handleImageUpload}
+                    onChange={(e) => setMemoryImageFile(e.target.files?.[0] || null)}
                     disabled={uploading || memories.filter((m) => m.media_type === "image").length >= user.max_images}
                     className="border-gray-200 focus:border-pink-500 focus:ring-pink-500"
                   />
                   {uploading && <p className="text-sm text-gray-500">Enviando imagem...</p>}
                 </div>
+                <Button
+                  onClick={handleAddMemory}
+                  disabled={
+                    uploading ||
+                    !newMemory.title ||
+                    !newMemory.memory_date ||
+                    !memoryImageFile ||
+                    memories.filter((m) => m.media_type === "image").length >= user.max_images
+                  }
+                  className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white mt-2"
+                >
+                  {uploading ? "Adicionando..." : "Adicionar Memória"}
+                </Button>
               </div>
 
-              {/* Memories Grid */}
+              {/* Memories Accordion */}
               {memories.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {memories.map((memory) => (
-                    <div key={memory.id} className="relative group">
-                      <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
-                        {memory.media_url && (
+                <Accordion type="multiple" className="w-full">
+                  {memories.map((memory, idx) => (
+                    <AccordionItem key={memory.id} value={memory.id}>
+                      <AccordionTrigger>
+                        <div className="flex items-center gap-4">
                           <img
                             src={memory.media_url || "/placeholder.svg"}
                             alt={memory.title || "Memória"}
-                            className="w-full h-full object-cover"
+                            className="w-12 h-12 object-cover rounded-md border"
                           />
-                        )}
-                      </div>
-                      <Button
-                        onClick={() => handleDeleteMemory(memory.id)}
-                        variant="destructive"
-                        size="sm"
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                      {memory.title && (
-                        <p className="mt-2 text-sm font-medium text-gray-900 truncate">{memory.title}</p>
-                      )}
-                      {memory.memory_date && (
-                        <p className="text-xs text-gray-500">
-                          {new Date(memory.memory_date).toLocaleDateString("pt-BR")}
-                        </p>
-                      )}
-                    </div>
+                          <div>
+                            <div className="font-medium text-gray-900">{memory.title}</div>
+                            <div className="text-xs text-gray-500">{memory.memory_date ? new Date(memory.memory_date).toLocaleDateString("pt-BR") : null}</div>
+                          </div>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="flex flex-col md:flex-row gap-4">
+                          <div className="flex-shrink-0">
+                            <img
+                              src={memory.media_url || "/placeholder.svg"}
+                              alt={memory.title || "Memória"}
+                              className="w-40 h-40 object-cover rounded-lg border"
+                            />
+                          </div>
+                          <div>
+                            <div className="font-semibold text-lg mb-2">{memory.title}</div>
+                            <div className="text-sm text-gray-700 mb-2">{memory.description}</div>
+                            <div className="text-xs text-gray-500 mb-2">{memory.memory_date ? new Date(memory.memory_date).toLocaleDateString("pt-BR") : null}</div>
+                            <Button
+                              onClick={() => handleDeleteMemory(memory.id)}
+                              variant="destructive"
+                              size="sm"
+                              className="mt-2"
+                            >
+                              <Trash2 className="w-4 h-4 mr-1" /> Remover
+                            </Button>
+                          </div>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
                   ))}
-                </div>
+                </Accordion>
               )}
             </CardContent>
           </Card>
