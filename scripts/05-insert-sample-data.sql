@@ -1,0 +1,26 @@
+-- Insert sample data for demonstration
+-- Note: This will only work after you create your first user through the app
+
+-- Sample couple page (you'll need to replace the user_id with a real one)
+-- INSERT INTO public.couple_pages (
+--   user_id,
+--   partner1_name,
+--   partner2_name,
+--   relationship_start_date,
+--   page_slug,
+--   theme_color,
+--   background_animation,
+--   qr_code_url
+-- ) VALUES (
+--   'your-user-id-here',
+--   'João',
+--   'Maria',
+--   '2022-02-14',
+--   'joao-maria-demo',
+--   '#B61862',
+--   'hearts',
+--   'https://your-domain.com/couple/joao-maria-demo'
+-- );
+
+-- This script is commented out because we need real user IDs first
+-- You can uncomment and modify after creating your first user
