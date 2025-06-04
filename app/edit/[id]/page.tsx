@@ -14,7 +14,6 @@ import { useRouter } from "next/navigation"
 import { toast } from "@/hooks/use-toast"
 import { Heart, ArrowLeft, Music, Camera, Trash2 } from "lucide-react"
 import Link from "next/link"
-import { Navbar } from "@/components/navbar"
 import type { CouplePage, User, Memory, Music as MusicType } from "@/lib/types"
 
 interface EditPageProps {
@@ -311,7 +310,6 @@ export default function EditPage({ params }: EditPageProps) {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
         <div className="container mx-auto px-4 py-20 text-center">
           <div className="text-gray-600">Carregando...</div>
         </div>
@@ -322,7 +320,6 @@ export default function EditPage({ params }: EditPageProps) {
   if (!couplePage || !user) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
         <div className="container mx-auto px-4 py-20 text-center">
           <div className="text-gray-600">Página não encontrada</div>
         </div>
@@ -332,8 +329,6 @@ export default function EditPage({ params }: EditPageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Back Button */}
         <Button asChild variant="ghost" className="mb-6 text-gray-600 hover:text-gray-900">

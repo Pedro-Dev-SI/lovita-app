@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { Heart, Sparkles, Star } from "lucide-react"
 
@@ -9,6 +10,17 @@ export function FloatingElements() {
     { Icon: Sparkles, color: "text-purple-500", size: 14 },
     { Icon: Star, color: "text-rose-500", size: 12 },
   ]
+
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
+
+  useEffect(() => {
+    setDimensions({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    })
+  }, [])
+
+  if (dimensions.width === 0 || dimensions.height === 0) return null
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -21,12 +33,12 @@ export function FloatingElements() {
             key={i}
             className={`absolute ${Element.color} opacity-20`}
             initial={{
-              x: Math.random() * window.innerWidth,
-              y: window.innerHeight + 100,
+              x: Math.random() * dimensions.width,
+              y: dimensions.height + 100,
             }}
             animate={{
               y: -100,
-              x: Math.random() * window.innerWidth,
+              x: Math.random() * dimensions.width,
             }}
             transition={{
               duration: Math.random() * 10 + 10,

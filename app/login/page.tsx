@@ -12,7 +12,6 @@ import { Heart, Mail, ArrowLeft } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { toast } from "@/hooks/use-toast"
 import Link from "next/link"
-import { Navbar } from "@/components/navbar"
 import { UserNotFoundModal } from "@/components/user-not-found-modal"
 import { motion } from "framer-motion"
 
@@ -50,6 +49,15 @@ export default function LoginPage() {
   const checkUserExists = async (email: string) => {
     try {
       // First check if user exists in our users table
+
+      const dataTeste = await supabase
+        .from("users")
+        .select("id, email, subscription_plan, subscription_end_date")
+        .eq("email", email)
+        .single()
+
+      console.log(dataTeste)
+
       const { data: userData, error } = await supabase
         .from("users")
         .select("id, email, subscription_plan, subscription_end_date")
@@ -140,8 +148,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-
       <div className="container mx-auto px-4 py-20 flex items-center justify-center">
         <div className="w-full max-w-md">
           {/* Back Button */}

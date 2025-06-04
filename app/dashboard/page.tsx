@@ -9,7 +9,6 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import type { CouplePage, User } from "@/lib/types"
 import { QRCodeGenerator } from "@/components/qr-code-generator"
-import { Navbar } from "@/components/navbar"
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
@@ -62,7 +61,6 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
         <div className="container mx-auto px-4 py-20 text-center">
           <div className="text-gray-600">Carregando...</div>
         </div>
@@ -72,8 +70,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">

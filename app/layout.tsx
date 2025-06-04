@@ -4,6 +4,7 @@ import { Inter, Poppins } from "next/font/google"
 import "./globals.css"
 import { SupabaseProvider } from "@/components/supabase-provider"
 import { Toaster } from "@/components/ui/toaster"
+import { ClientLayoutWrapper } from "@/components/client-layout-wrapper"
 
 const inter = Inter({ subsets: ["latin"] })
 const poppins = Poppins({
@@ -28,7 +29,7 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className={`${inter.className} ${poppins.variable}`}>
         <SupabaseProvider>
-          {children}
+          <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
           <Toaster />
         </SupabaseProvider>
       </body>

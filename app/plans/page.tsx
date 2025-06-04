@@ -4,7 +4,6 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check, X, Star, ArrowRight } from "lucide-react"
-import { Navbar } from "@/components/navbar"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase/client"
 import { toast } from "@/hooks/use-toast"
@@ -172,8 +171,6 @@ export default function PlansPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-
       <div className="container mx-auto px-4 py-16">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">

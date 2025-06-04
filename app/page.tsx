@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Heart, Sparkles, Check, Star, X, ArrowRight, Clock, Music, Zap, ImageIcon } from "lucide-react"
 import Link from "next/link"
-import { Navbar } from "@/components/navbar"
 import { DemoModeBanner } from "@/components/demo-mode-banner"
 import { FAQSection } from "@/components/faq-section"
 import { FloatingElements } from "@/components/floating-elements"
@@ -14,7 +13,6 @@ import { motion } from "framer-motion"
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-50 font-poppins">
-      <Navbar />
 
       <div className="container mx-auto px-4 pt-24">
         <DemoModeBanner />
@@ -38,7 +36,7 @@ export default function HomePage() {
           >
             <Badge
               variant="secondary"
-              className="mb-8 bg-pink-100 text-pink-600 hover:bg-pink-100 px-6 py-3 rounded-full text-sm font-medium shadow-lg"
+              className="mb-20 bg-pink-100 text-pink-600 hover:bg-pink-100 px-6 py-3 rounded-full text-sm font-medium shadow-lg"
             >
               <motion.div
                 animate={{ rotate: [0, 10, -10, 0] }}
@@ -468,7 +466,7 @@ export default function HomePage() {
               <Heart className="w-5 h-5 text-pink-500 fill-pink-500" />
             </motion.div>
           </motion.div>
-          <p className="text-gray-600">© 2024 Lovita. Feito com ❤️ para casais apaixonados.</p>
+          <p className="text-gray-600">© 2025 Lovita. Feito com ❤️ para casais apaixonados.</p>
         </div>
       </footer>
     </div>

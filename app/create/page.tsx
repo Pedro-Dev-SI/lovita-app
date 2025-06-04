@@ -13,7 +13,6 @@ import { useRouter } from "next/navigation"
 import { toast } from "@/hooks/use-toast"
 import { Heart, ArrowLeft } from "lucide-react"
 import Link from "next/link"
-import { Navbar } from "@/components/navbar"
 
 export default function CreatePage() {
   const [formData, setFormData] = useState({
@@ -93,8 +92,6 @@ export default function CreatePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         {/* Back Button */}
         <Button asChild variant="ghost" className="mb-6 text-gray-600 hover:text-gray-900">
