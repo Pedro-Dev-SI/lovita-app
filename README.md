@@ -301,4 +301,4 @@ npm run dev
 
 ---
 
-*Feito com ❤️ para casais apaixonados | © 2024 Lovita*
+*Feito com ❤️ para casais apaixonados | © 2025 Lovita*
