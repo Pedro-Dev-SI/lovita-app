@@ -466,9 +466,10 @@ export default function EditPage({ params }: EditPageProps) {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="#B61862">Rosa Romântico</SelectItem>
-                      <SelectItem value="#9F2525">Vermelho Paixão</SelectItem>
-                      <SelectItem value="#82181C">Bordô Elegante</SelectItem>
-                      <SelectItem value="#C3B8BB">Rosa Suave</SelectItem>
+                      <SelectItem value="#1E40AF">Azul Sereno</SelectItem>
+                      <SelectItem value="#047857">Verde Esperança</SelectItem>
+                      <SelectItem value="#7C3AED">Roxo Encantado</SelectItem>
+                      <SelectItem value="#B45309">Âmbar Aconchegante</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -488,6 +489,7 @@ export default function EditPage({ params }: EditPageProps) {
                       <SelectContent>
                         <SelectItem value="hearts">Corações Flutuantes</SelectItem>
                         <SelectItem value="confetti">Confete Colorido</SelectItem>
+                        <SelectItem value="stars">Estrelas Cadentes</SelectItem>
                         <SelectItem value="none">Sem Animação</SelectItem>
                       </SelectContent>
                     </Select>

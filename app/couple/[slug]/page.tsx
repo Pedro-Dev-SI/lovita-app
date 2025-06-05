@@ -7,6 +7,7 @@ import { TimeCounter } from "@/components/time-counter"
 import { Confetti } from "@/components/animations/confetti"
 import { Hearts } from "@/components/animations/hearts"
 import { FloatingHearts } from "@/components/animations/floating-hearts"
+import { FloatingStars } from "@/components/animations/floating-stars"
 import { isAnniversary } from "@/lib/utils/date"
 import { Share2, Heart, Play, Pause, Volume2 } from "lucide-react"
 import { motion } from "framer-motion"
@@ -147,9 +148,15 @@ export default function CouplePage({ params }: CouplePageProps) {
       <Hearts show={anniversaryType === "yearly"} />
 
       {/* Background Animation */}
-      {couplePage.background_animation === "hearts" && !anniversaryType && (
+      {!anniversaryType && couplePage.background_animation === "hearts" && (
         <FloatingHearts color={heartColor} count={20} />
       )}
+      {!anniversaryType && couplePage.background_animation === "confetti" ? (
+        <Confetti show={true} />
+      ) : null}
+      {!anniversaryType && couplePage.background_animation === "stars" ? (
+        <FloatingStars color="#fbbf24" count={20} />
+      ) : null}
 
       {/* Music Player - Floating */}
       {primaryMusic && showMusicPlayer && (
