@@ -8,6 +8,7 @@ import { Confetti } from "@/components/animations/confetti"
 import { Hearts } from "@/components/animations/hearts"
 import { FloatingHearts } from "@/components/animations/floating-hearts"
 import { FloatingStars } from "@/components/animations/floating-stars"
+import { FloatingDucks } from "@/components/animations/floating-ducks"
 import { isAnniversary } from "@/lib/utils/date"
 import { Share2, Heart, Play, Pause, Volume2 } from "lucide-react"
 import { motion } from "framer-motion"
@@ -148,15 +149,24 @@ export default function CouplePage({ params }: CouplePageProps) {
       <Hearts show={anniversaryType === "yearly"} />
 
       {/* Background Animation */}
-      {!anniversaryType && couplePage.background_animation === "hearts" && (
-        <FloatingHearts color={heartColor} count={20} />
+      {couplePage.theme_color === "patodavida" ? (
+        <>
+          <FloatingDucks count={10} />
+          <FloatingHearts color="#ff3b3b" count={12} />
+        </>
+      ) : (
+        <>
+          {!anniversaryType && couplePage.background_animation === "hearts" && (
+            <FloatingHearts color={heartColor} count={20} />
+          )}
+          {!anniversaryType && couplePage.background_animation === "confetti" ? (
+            <Confetti show={true} />
+          ) : null}
+          {!anniversaryType && couplePage.background_animation === "stars" ? (
+            <FloatingStars color="#fbbf24" count={20} />
+          ) : null}
+        </>
       )}
-      {!anniversaryType && couplePage.background_animation === "confetti" ? (
-        <Confetti show={true} />
-      ) : null}
-      {!anniversaryType && couplePage.background_animation === "stars" ? (
-        <FloatingStars color="#fbbf24" count={20} />
-      ) : null}
 
       {/* Music Player - Floating */}
       {primaryMusic && primaryMusic.spotify_url && (
@@ -194,7 +204,7 @@ export default function CouplePage({ params }: CouplePageProps) {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-block relative">
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg flex items-center justify-center gap-2">
+            <h1 className={`text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg flex items-center justify-center gap-2 font-dancing ${couplePage.theme_color === 'patodavida' ? 'text-white [text-shadow:0_2px_8px_rgba(30,41,59,0.3)]' : 'text-white'}`}> 
               {couplePage.partner1_name} & {couplePage.partner2_name}
               <motion.span
                 animate={{ scale: [1, 1.3, 1] }}
@@ -204,10 +214,23 @@ export default function CouplePage({ params }: CouplePageProps) {
                 ❤️
               </motion.span>
             </h1>
+            {couplePage.theme_color === 'patodavida' && (
+              <div className="flex items-center justify-center gap-2 mt-2">
+                <span className="text-lg font-semibold text-white [text-shadow:0_2px_8px_rgba(30,41,59,0.3)]">Te Amo Patodavida</span>
+                <span className="inline-block align-middle">
+                  <svg width="32" height="24" viewBox="0 0 64 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="32" cy="40" rx="18" ry="6" fill="#FDE68A" opacity="0.3" />
+                    <path d="M16 32c0-8 8-16 16-16s16 8 16 16-8 8-16 8-16 0-16-8z" fill="#FFE066" />
+                    <circle cx="44" cy="24" r="8" fill="#FFE066" />
+                    <ellipse cx="47" cy="22" rx="2" ry="1" fill="#F59E42" />
+                    <ellipse cx="40" cy="22" rx="1.5" ry="1" fill="#fff" />
+                    <ellipse cx="40.5" cy="22" rx="0.5" ry="0.5" fill="#222" />
+                    <path d="M52 24c2 0 4 1 4 2s-2 2-4 2v-4z" fill="#F59E42" />
+                  </svg>
+                </span>
+              </div>
+            )}
           </div>
-          <p className="text-xl text-white/80 mt-2">
-            Juntos desde {formatDateBR(couplePage.relationship_start_date)}
-          </p>
         </div>
 
         {/* Time Counter */}
@@ -235,6 +258,9 @@ export default function CouplePage({ params }: CouplePageProps) {
             </motion.span>
           </h2>
           <TimeCounter startDate={couplePage.relationship_start_date} />
+          <p className="text-sm font-semibold text-white text-center mt-2 [text-shadow:0_2px_8px_rgba(30,41,59,0.3)]">
+            Desde {formatDateBR(couplePage.relationship_start_date)}
+          </p>
         </motion.div>
 
         {/* Nossa História */}

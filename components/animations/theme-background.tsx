@@ -43,6 +43,12 @@ export function ThemeBackground({ theme, children }: ThemeBackgroundProps) {
           overlayColor: "rgba(180, 83, 9, 0.05)",
           particleColor: "rgba(252, 211, 77, 0.3)",
         }
+      case "patodavida": // Tema Patodavida
+        return {
+          gradient: "from-[#7EC3E6] via-[#5EA7D1] to-[#B3E0FF]", // azul mais escuro
+          overlayColor: "rgba(94, 167, 209, 0.10)",
+          particleColor: "rgba(255, 255, 255, 0.18)",
+        }
       default: // Default/fallback
         return {
           gradient: "from-[#20231F] via-[#82181C] to-[#B61862]",

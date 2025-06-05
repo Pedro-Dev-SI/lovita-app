@@ -478,6 +478,7 @@ export default function EditPage({ params }: EditPageProps) {
                       <SelectItem value="#047857">Verde Esperança</SelectItem>
                       <SelectItem value="#7C3AED">Roxo Encantado</SelectItem>
                       <SelectItem value="#B45309">Âmbar Aconchegante</SelectItem>
+                      <SelectItem value="patodavida">Patodavida (Azul Céu)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -490,6 +491,7 @@ export default function EditPage({ params }: EditPageProps) {
                     <Select
                       value={formData.background_animation}
                       onValueChange={(value) => setFormData({ ...formData, background_animation: value })}
+                      disabled={formData.theme_color === "patodavida"}
                     >
                       <SelectTrigger className="h-12 border-gray-200 focus:border-pink-500 focus:ring-pink-500">
                         <SelectValue />
@@ -501,6 +503,9 @@ export default function EditPage({ params }: EditPageProps) {
                         <SelectItem value="none">Sem Animação</SelectItem>
                       </SelectContent>
                     </Select>
+                    {formData.theme_color === "patodavida" && (
+                      <p className="text-xs text-blue-600 mt-1">Este tema possui animações exclusivas de patinhos e corações vermelhos!</p>
+                    )}
                   </div>
                 )}
 
