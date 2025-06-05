@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { supabase } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,6 +16,8 @@ import { Heart, ArrowLeft, Music, Camera, Trash2 } from "lucide-react"
 import Link from "next/link"
 import type { CouplePage, User, Memory, Music as MusicType } from "@/lib/types"
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
+import data from '@emoji-mart/data'
+import Picker from '@emoji-mart/react'
 
 interface EditPageProps {
   params: {
@@ -39,6 +41,7 @@ export default function EditPage({ params }: EditPageProps) {
     relationship_start_date: "",
     theme_color: "#B61862",
     background_animation: "hearts",
+    love_story: "",
   })
 
   const [newMemory, setNewMemory] = useState({
@@ -55,6 +58,9 @@ export default function EditPage({ params }: EditPageProps) {
   })
 
   const [memoryImageFile, setMemoryImageFile] = useState<File | null>(null)
+
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -88,6 +94,7 @@ export default function EditPage({ params }: EditPageProps) {
           relationship_start_date: pageData.relationship_start_date,
           theme_color: pageData.theme_color,
           background_animation: pageData.background_animation,
+          love_story: pageData.love_story || "",
         })
 
         // Get memories
@@ -135,6 +142,7 @@ export default function EditPage({ params }: EditPageProps) {
           relationship_start_date: formData.relationship_start_date,
           theme_color: formData.theme_color,
           background_animation: formData.background_animation,
+          love_story: formData.love_story,
           updated_at: new Date().toISOString(),
         })
         .eq("id", params.id)
@@ -495,6 +503,55 @@ export default function EditPage({ params }: EditPageProps) {
                     </Select>
                   </div>
                 )}
+
+                <div className="space-y-2 relative">
+                  <Label htmlFor="love-story" className="text-gray-700 font-medium">
+                    Uma breve história de vocês (opcional)
+                  </Label>
+                  <div className="flex items-start gap-2">
+                    <Textarea
+                      id="love-story"
+                      ref={textareaRef}
+                      value={formData.love_story}
+                      onChange={(e) => setFormData({ ...formData, love_story: e.target.value })}
+                      placeholder="Conte algo especial, use emojis se quiser! 💖✨"
+                      className="border-gray-200 focus:border-pink-500 focus:ring-pink-500 min-h-[80px]"
+                      maxLength={1000}
+                    />
+                    <button
+                      type="button"
+                      className="mt-2 ml-1 p-2 rounded-full bg-pink-100 hover:bg-pink-200 border border-pink-200 text-xl"
+                      onClick={() => setShowEmojiPicker((v) => !v)}
+                      aria-label="Adicionar emoji"
+                    >
+                      😊
+                    </button>
+                  </div>
+                  {showEmojiPicker && (
+                    <div className="absolute z-50 left-0 mt-2">
+                      <Picker
+                        data={data}
+                        onEmojiSelect={(emoji: any) => {
+                          const textarea = textareaRef.current
+                          if (!textarea) return
+                          const start = textarea.selectionStart
+                          const end = textarea.selectionEnd
+                          const text = formData.love_story
+                          const newText = text.slice(0, start) + emoji.native + text.slice(end)
+                          setFormData({ ...formData, love_story: newText })
+                          setShowEmojiPicker(false)
+                          setTimeout(() => {
+                            textarea.focus()
+                            textarea.selectionStart = textarea.selectionEnd = start + emoji.native.length
+                          }, 0)
+                        }}
+                        previewPosition="none"
+                        theme="light"
+                        style={{ position: 'absolute', left: 0, top: 40, zIndex: 100 }}
+                      />
+                    </div>
+                  )}
+                </div>
 
                 <Button
                   type="submit"

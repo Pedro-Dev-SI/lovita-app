@@ -237,6 +237,23 @@ export default function CouplePage({ params }: CouplePageProps) {
           <TimeCounter startDate={couplePage.relationship_start_date} />
         </motion.div>
 
+        {/* Nossa História */}
+        {couplePage.love_story && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="mb-12 max-w-2xl mx-auto bg-white/20 rounded-xl p-6 shadow-lg text-center backdrop-blur-sm"
+          >
+            <h2 className="text-2xl font-bold text-white mb-4 flex items-center justify-center gap-2">
+              <span role="img" aria-label="história">📖</span> Nossa História
+            </h2>
+            <p className="text-lg text-white/90 whitespace-pre-line break-words">
+              {couplePage.love_story}
+            </p>
+          </motion.div>
+        )}
+
         {/* Memories Gallery */}
         {memories.length > 0 && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>

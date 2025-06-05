@@ -26,6 +26,7 @@ export interface CouplePage {
   is_active: boolean
   created_at: string
   updated_at: string
+  love_story?: string
 }
 
 export interface Memory {
