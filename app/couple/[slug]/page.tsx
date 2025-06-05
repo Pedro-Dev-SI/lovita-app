@@ -159,63 +159,18 @@ export default function CouplePage({ params }: CouplePageProps) {
       ) : null}
 
       {/* Music Player - Floating */}
-      {primaryMusic && showMusicPlayer && (
-        <motion.div
-          initial={{ opacity: 0, x: 100 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 2 }}
-          className="fixed bottom-6 left-6 z-50"
-        >
-          <div className="bg-black/30 backdrop-blur-md rounded-full p-3 border border-white/20">
-            <div className="flex items-center gap-3">
-              <Button
-                onClick={toggleMusic}
-                size="sm"
-                className="rounded-full w-10 h-10 p-0 bg-white/20 hover:bg-white/30 border-none"
-              >
-                {isPlaying ? <Pause className="w-4 h-4 text-white" /> : <Play className="w-4 h-4 text-white ml-0.5" />}
-              </Button>
-
-              <div className="text-white text-sm max-w-48 truncate">
-                <div className="font-medium">{primaryMusic.song_title}</div>
-                {primaryMusic.artist && <div className="text-white/70 text-xs">{primaryMusic.artist}</div>}
-              </div>
-
-              <motion.div
-                animate={{ scale: isPlaying ? [1, 1.2, 1] : 1 }}
-                transition={{ duration: 1, repeat: isPlaying ? Number.POSITIVE_INFINITY : 0 }}
-              >
-                <Volume2 className="w-4 h-4 text-white/70" />
-              </motion.div>
-            </div>
-          </div>
-
-          {/* Spotify Player só aparece se isPlaying for true */}
-          {primaryMusic.spotify_url && isPlaying && (
-            <div className="absolute -z-10 opacity-0 pointer-events-none">
-              <iframe
-                src={`${primaryMusic.spotify_url.replace("track/", "embed/track/")}?utm_source=generator&autoplay=1&theme=0`}
-                width="300"
-                height="152"
-                frameBorder="0"
-                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                loading="lazy"
-              />
-            </div>
-          )}
-
-          {/* Botão grande para tocar música se não estiver tocando */}
-          {primaryMusic.spotify_url && !isPlaying && (
-            <div className="mt-4 flex justify-center">
-              <Button
-                onClick={toggleMusic}
-                className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-3 text-lg rounded-full shadow-lg"
-              >
-                <Play className="w-6 h-6 mr-2" /> Tocar música
-              </Button>
-            </div>
-          )}
-        </motion.div>
+      {primaryMusic && primaryMusic.spotify_url && (
+        <div className="fixed bottom-6 left-6 z-50">
+          <iframe
+            src={`${primaryMusic.spotify_url.replace("track/", "embed/track/")}?utm_source=generator&autoplay=1&theme=0`}
+            width="320"
+            height="80"
+            frameBorder="0"
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            loading="lazy"
+            className="rounded-lg shadow-lg"
+          />
+        </div>
       )}
 
       {/* Share Button */}
