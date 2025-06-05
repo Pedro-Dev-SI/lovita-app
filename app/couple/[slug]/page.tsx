@@ -183,8 +183,8 @@ export default function CouplePage({ params }: CouplePageProps) {
             </div>
           </div>
 
-          {/* Hidden Spotify Player */}
-          {primaryMusic.spotify_url && (
+          {/* Spotify Player só aparece se isPlaying for true */}
+          {primaryMusic.spotify_url && isPlaying && (
             <div className="absolute -z-10 opacity-0 pointer-events-none">
               <iframe
                 src={`${primaryMusic.spotify_url.replace("track/", "embed/track/")}?utm_source=generator&autoplay=1&theme=0`}
@@ -194,6 +194,18 @@ export default function CouplePage({ params }: CouplePageProps) {
                 allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                 loading="lazy"
               />
+            </div>
+          )}
+
+          {/* Botão grande para tocar música se não estiver tocando */}
+          {primaryMusic.spotify_url && !isPlaying && (
+            <div className="mt-4 flex justify-center">
+              <Button
+                onClick={toggleMusic}
+                className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-3 text-lg rounded-full shadow-lg"
+              >
+                <Play className="w-6 h-6 mr-2" /> Tocar música
+              </Button>
             </div>
           )}
         </motion.div>
@@ -218,39 +230,23 @@ export default function CouplePage({ params }: CouplePageProps) {
 
       <div className="relative z-10 container mx-auto px-4 py-8">
         {/* Header */}
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
-          <motion.div
-            className="inline-block relative"
-            animate={{ rotate: [0, -5, 5, -5, 0] }}
-            transition={{ duration: 5, repeat: Number.POSITIVE_INFINITY }}
-          >
-            <motion.h1
-              className="text-4xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg"
-              animate={{ scale: [1, 1.02, 1] }}
-              transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
-            >
+        <div className="text-center mb-12">
+          <div className="inline-block relative">
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg flex items-center justify-center gap-2">
               {couplePage.partner1_name} & {couplePage.partner2_name}
-            </motion.h1>
-            <motion.div
-              className="absolute -top-6 -right-6 text-3xl"
-              animate={{ rotate: [0, 20, 0, -20, 0], scale: [1, 1.2, 1] }}
-              transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
-            >
-              ❤️
-            </motion.div>
-          </motion.div>
-          <motion.p
-            className="text-xl text-white/80 mt-2"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-          >
-            Juntos desde{" "}
-            <span className="font-semibold">
-              {new Date(couplePage.relationship_start_date).toLocaleDateString("pt-BR")}
-            </span>
-          </motion.p>
-        </motion.div>
+              <motion.span
+                animate={{ scale: [1, 1.3, 1] }}
+                transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY }}
+                className="inline-block text-3xl ml-2 align-middle"
+              >
+                ❤️
+              </motion.span>
+            </h1>
+          </div>
+          <p className="text-xl text-white/80 mt-2">
+            Juntos desde {formatDateBR(couplePage.relationship_start_date)}
+          </p>
+        </div>
 
         {/* Time Counter */}
         <motion.div
@@ -353,4 +349,11 @@ function getHeartColorFromTheme(themeColor: string): string {
     default:
       return "#ff6b81"
   }
+}
+
+// Função utilitária para formatar a data corretamente:
+function formatDateBR(dateString: string) {
+  if (!dateString) return ""
+  const [year, month, day] = dateString.split("-")
+  return `${day}/${month}/${year}`
 }

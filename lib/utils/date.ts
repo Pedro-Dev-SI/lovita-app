@@ -1,5 +1,7 @@
 export function calculateTimeTogether(startDate: string) {
-  const start = new Date(startDate)
+  // Garantir que a data seja interpretada como local, não UTC
+  const [year, month, day] = startDate.split("-").map(Number)
+  const start = new Date(year, month - 1, day)
   const now = new Date()
 
   const diffTime = Math.abs(now.getTime() - start.getTime())

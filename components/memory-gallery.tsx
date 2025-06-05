@@ -11,6 +11,12 @@ interface MemoryGalleryProps {
   memories: Memory[]
 }
 
+function formatDateBR(dateString: string) {
+  if (!dateString) return ""
+  const [year, month, day] = dateString.split("-")
+  return `${day}/${month}/${year}`
+}
+
 export function MemoryGallery({ memories }: MemoryGalleryProps) {
   const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -75,7 +81,7 @@ export function MemoryGallery({ memories }: MemoryGalleryProps) {
                     <p className="text-white text-sm font-medium truncate">{memory.title}</p>
                     {memory.memory_date && (
                       <p className="text-white/60 text-xs">
-                        {new Date(memory.memory_date).toLocaleDateString("pt-BR")}
+                        {formatDateBR(memory.memory_date)}
                       </p>
                     )}
                   </div>
@@ -142,7 +148,7 @@ export function MemoryGallery({ memories }: MemoryGalleryProps) {
                   {selectedMemory.title && <h3 className="text-xl font-bold mb-2">{selectedMemory.title}</h3>}
                   {selectedMemory.memory_date && (
                     <p className="text-white/70 mb-2">
-                      {new Date(selectedMemory.memory_date).toLocaleDateString("pt-BR")}
+                      {formatDateBR(selectedMemory.memory_date)}
                     </p>
                   )}
                   {selectedMemory.description && <p className="text-white/90">{selectedMemory.description}</p>}
