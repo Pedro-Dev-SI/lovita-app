@@ -34,6 +34,7 @@ export default function CouplePage({ params }: CouplePageProps) {
   const [showMusicPlayer, setShowMusicPlayer] = useState(false)
 
   useEffect(() => {
+    if (!params?.slug) return;
     const fetchPageData = async () => {
       try {
         // Fetch couple page
@@ -76,7 +77,7 @@ export default function CouplePage({ params }: CouplePageProps) {
     }
 
     fetchPageData()
-  }, [params.slug])
+  }, [params?.slug])
 
   // Auto-play music after page loads
   useEffect(() => {
@@ -204,7 +205,7 @@ export default function CouplePage({ params }: CouplePageProps) {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-block relative">
-            <h1 className={`text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg flex items-center justify-center gap-2 ${couplePage.theme_color === 'patodavida' ? 'text-white [text-shadow:0_2px_8px_rgba(30,41,59,0.3)]' : 'text-white'}`}>
+            <h1 className={`text-4xl md:text-6xl font-bold mb-4 mt-12 drop-shadow-lg flex items-center justify-center gap-2 ${couplePage.theme_color === 'patodavida' ? 'text-white [text-shadow:0_2px_8px_rgba(30,41,59,0.3)]' : 'text-white'}`}>
               <motion.span
                   animate={{ scale: [1, 1.3, 1] }}
                   transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY }}
