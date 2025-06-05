@@ -6,12 +6,14 @@ import type { CouplePage, Music, Memory } from "@/lib/types"
 import { TimeCounter } from "@/components/time-counter"
 import { Confetti } from "@/components/animations/confetti"
 import { Hearts } from "@/components/animations/hearts"
+import { FloatingHearts } from "@/components/animations/floating-hearts"
 import { isAnniversary } from "@/lib/utils/date"
-import { Card, CardContent } from "@/components/ui/card"
-import { MusicIcon, Camera, Heart, Share2 } from "lucide-react"
+import { Share2, Heart, Play, Pause, Volume2 } from "lucide-react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { QRCodeGenerator } from "@/components/qr-code-generator"
+import { ThemeBackground } from "@/components/animations/theme-background"
+import { MemoryGallery } from "@/components/memory-gallery"
 
 interface CouplePageProps {
   params: {
@@ -26,6 +28,8 @@ export default function CouplePage({ params }: CouplePageProps) {
   const [loading, setLoading] = useState(true)
   const [anniversaryType, setAnniversaryType] = useState<"monthly" | "yearly" | null>(null)
   const [showQR, setShowQR] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [showMusicPlayer, setShowMusicPlayer] = useState(false)
 
   useEffect(() => {
     const fetchPageData = async () => {
@@ -72,6 +76,18 @@ export default function CouplePage({ params }: CouplePageProps) {
     fetchPageData()
   }, [params.slug])
 
+  // Auto-play music after page loads
+  useEffect(() => {
+    if (music.length > 0) {
+      const timer = setTimeout(() => {
+        setIsPlaying(true)
+        setShowMusicPlayer(true)
+      }, 2000) // Wait 2 seconds after page loads
+
+      return () => clearTimeout(timer)
+    }
+  }, [music])
+
   const handleShare = async () => {
     const url = window.location.href
     if (navigator.share) {
@@ -89,6 +105,10 @@ export default function CouplePage({ params }: CouplePageProps) {
       navigator.clipboard.writeText(url)
       alert("Link copiado para a área de transferência!")
     }
+  }
+
+  const toggleMusic = () => {
+    setIsPlaying(!isPlaying)
   }
 
   if (loading) {
@@ -118,35 +138,65 @@ export default function CouplePage({ params }: CouplePageProps) {
   }
 
   const primaryMusic = music.find((m) => m.is_primary) || music[0]
+  const heartColor = getHeartColorFromTheme(couplePage.theme_color)
 
   return (
-    <div
-      className="min-h-screen relative overflow-hidden"
-      style={{
-        background: `linear-gradient(135deg, #20231F 0%, ${couplePage.theme_color} 100%)`,
-      }}
-    >
+    <ThemeBackground theme={couplePage.theme_color}>
       {/* Anniversary Animations */}
       <Confetti show={anniversaryType === "monthly"} />
       <Hearts show={anniversaryType === "yearly"} />
 
       {/* Background Animation */}
       {couplePage.background_animation === "hearts" && !anniversaryType && (
-        <div className="absolute inset-0 pointer-events-none">
-          {Array.from({ length: 15 }).map((_, i) => (
-            <Heart
-              key={i}
-              className="absolute text-white/10 animate-pulse"
-              size={16 + Math.random() * 24}
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 3}s`,
-                animationDuration: `${2 + Math.random() * 2}s`,
-              }}
-            />
-          ))}
-        </div>
+        <FloatingHearts color={heartColor} count={20} />
+      )}
+
+      {/* Music Player - Floating */}
+      {primaryMusic && showMusicPlayer && (
+        <motion.div
+          initial={{ opacity: 0, x: 100 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 2 }}
+          className="fixed bottom-6 left-6 z-50"
+        >
+          <div className="bg-black/30 backdrop-blur-md rounded-full p-3 border border-white/20">
+            <div className="flex items-center gap-3">
+              <Button
+                onClick={toggleMusic}
+                size="sm"
+                className="rounded-full w-10 h-10 p-0 bg-white/20 hover:bg-white/30 border-none"
+              >
+                {isPlaying ? <Pause className="w-4 h-4 text-white" /> : <Play className="w-4 h-4 text-white ml-0.5" />}
+              </Button>
+
+              <div className="text-white text-sm max-w-48 truncate">
+                <div className="font-medium">{primaryMusic.song_title}</div>
+                {primaryMusic.artist && <div className="text-white/70 text-xs">{primaryMusic.artist}</div>}
+              </div>
+
+              <motion.div
+                animate={{ scale: isPlaying ? [1, 1.2, 1] : 1 }}
+                transition={{ duration: 1, repeat: isPlaying ? Number.POSITIVE_INFINITY : 0 }}
+              >
+                <Volume2 className="w-4 h-4 text-white/70" />
+              </motion.div>
+            </div>
+          </div>
+
+          {/* Hidden Spotify Player */}
+          {primaryMusic.spotify_url && (
+            <div className="absolute -z-10 opacity-0 pointer-events-none">
+              <iframe
+                src={`${primaryMusic.spotify_url.replace("track/", "embed/track/")}?utm_source=generator&autoplay=1&theme=0`}
+                width="300"
+                height="152"
+                frameBorder="0"
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                loading="lazy"
+              />
+            </div>
+          )}
+        </motion.div>
       )}
 
       {/* Share Button */}
@@ -169,16 +219,37 @@ export default function CouplePage({ params }: CouplePageProps) {
       <div className="relative z-10 container mx-auto px-4 py-8">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
-          <motion.h1
-            className="text-4xl md:text-6xl font-bold text-white mb-4"
-            animate={{ scale: [1, 1.02, 1] }}
-            transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
+          <motion.div
+            className="inline-block relative"
+            animate={{ rotate: [0, -5, 5, -5, 0] }}
+            transition={{ duration: 5, repeat: Number.POSITIVE_INFINITY }}
           >
-            {couplePage.partner1_name} & {couplePage.partner2_name}
-          </motion.h1>
-          <p className="text-xl text-white/80">
-            Juntos desde {new Date(couplePage.relationship_start_date).toLocaleDateString("pt-BR")}
-          </p>
+            <motion.h1
+              className="text-4xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg"
+              animate={{ scale: [1, 1.02, 1] }}
+              transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
+            >
+              {couplePage.partner1_name} & {couplePage.partner2_name}
+            </motion.h1>
+            <motion.div
+              className="absolute -top-6 -right-6 text-3xl"
+              animate={{ rotate: [0, 20, 0, -20, 0], scale: [1, 1.2, 1] }}
+              transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
+            >
+              ❤️
+            </motion.div>
+          </motion.div>
+          <motion.p
+            className="text-xl text-white/80 mt-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            Juntos desde{" "}
+            <span className="font-semibold">
+              {new Date(couplePage.relationship_start_date).toLocaleDateString("pt-BR")}
+            </span>
+          </motion.p>
         </motion.div>
 
         {/* Time Counter */}
@@ -188,93 +259,30 @@ export default function CouplePage({ params }: CouplePageProps) {
           transition={{ delay: 0.2 }}
           className="mb-12"
         >
-          <h2 className="text-2xl font-bold text-white text-center mb-6">Tempo Juntos</h2>
+          <h2 className="text-2xl font-bold text-white text-center mb-6">
+            <motion.span
+              animate={{ y: [0, -5, 0] }}
+              transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+              className="inline-block"
+            >
+              ✨
+            </motion.span>{" "}
+            Tempo Juntos{" "}
+            <motion.span
+              animate={{ y: [0, -5, 0] }}
+              transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, delay: 1 }}
+              className="inline-block"
+            >
+              ✨
+            </motion.span>
+          </h2>
           <TimeCounter startDate={couplePage.relationship_start_date} />
         </motion.div>
-
-        {/* Music Section */}
-        {primaryMusic && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="mb-12"
-          >
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-4 mb-4">
-                  <MusicIcon className="w-6 h-6 text-[#FFB7CB]" />
-                  <h3 className="text-xl font-bold text-white">Nossa Música</h3>
-                </div>
-                <div className="text-white">
-                  <h4 className="font-semibold">{primaryMusic.song_title}</h4>
-                  {primaryMusic.artist && <p className="text-white/70">{primaryMusic.artist}</p>}
-                  {primaryMusic.spotify_url && (
-                    <div className="mt-4">
-                      <iframe
-                        src={primaryMusic.spotify_url.replace("track/", "embed/track/")}
-                        width="100%"
-                        height="152"
-                        frameBorder="0"
-                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                        loading="lazy"
-                        className="rounded-lg"
-                      />
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
 
         {/* Memories Gallery */}
         {memories.length > 0 && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-4 mb-6">
-                  <Camera className="w-6 h-6 text-[#FFB7CB]" />
-                  <h3 className="text-xl font-bold text-white">Nossas Memórias</h3>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {memories.map((memory, index) => (
-                    <motion.div
-                      key={memory.id}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.1 * index }}
-                      whileHover={{ scale: 1.05 }}
-                      className="aspect-square rounded-lg overflow-hidden bg-white/5 cursor-pointer group"
-                    >
-                      {memory.media_url && (
-                        <>
-                          {memory.media_type === "image" ? (
-                            <img
-                              src={memory.media_url || "/placeholder.svg"}
-                              alt={memory.title || "Memória"}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                            />
-                          ) : (
-                            <video src={memory.media_url} className="w-full h-full object-cover" controls />
-                          )}
-                        </>
-                      )}
-                      {memory.title && (
-                        <div className="absolute bottom-0 left-0 right-0 bg-black/50 backdrop-blur-sm p-2">
-                          <p className="text-white text-sm font-medium truncate">{memory.title}</p>
-                          {memory.memory_date && (
-                            <p className="text-white/60 text-xs">
-                              {new Date(memory.memory_date).toLocaleDateString("pt-BR")}
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </motion.div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <MemoryGallery memories={memories} />
           </motion.div>
         )}
 
@@ -297,7 +305,7 @@ export default function CouplePage({ params }: CouplePageProps) {
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="inline-block"
+              className="inline-block bg-white p-4 rounded-lg shadow-lg"
             >
               <QRCodeGenerator url={window.location.href} size={200} />
             </motion.div>
@@ -311,10 +319,38 @@ export default function CouplePage({ params }: CouplePageProps) {
           transition={{ delay: 1 }}
           className="text-center mt-12 text-white/60"
         >
-          <p>Feito com ❤️ para celebrar o amor</p>
+          <p>
+            Feito com{" "}
+            <motion.span
+              animate={{ scale: [1, 1.3, 1] }}
+              transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
+              className="inline-block text-red-400"
+            >
+              ❤️
+            </motion.span>{" "}
+            para celebrar o amor
+          </p>
           <p className="text-sm mt-2">Crie sua própria página em lovita.com</p>
         </motion.div>
       </div>
-    </div>
+    </ThemeBackground>
   )
+}
+
+// Helper function to get heart color based on theme
+function getHeartColorFromTheme(themeColor: string): string {
+  switch (themeColor) {
+    case "#B61862": // Pink theme
+      return "#ff6b81"
+    case "#1E40AF": // Blue theme
+      return "#60a5fa"
+    case "#047857": // Green theme
+      return "#34d399"
+    case "#7C3AED": // Purple theme
+      return "#a78bfa"
+    case "#B45309": // Amber theme
+      return "#fbbf24"
+    default:
+      return "#ff6b81"
+  }
 }

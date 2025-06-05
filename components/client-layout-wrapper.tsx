@@ -14,4 +14,4 @@ export function ClientLayoutWrapper({ children }: { children: ReactNode }) {
       <main className={!isCouplePage ? "pt-16" : ""}>{children}</main>
     </>
   )
-} 
+}
