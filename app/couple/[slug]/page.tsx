@@ -14,7 +14,7 @@ import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { QRCodeGenerator } from "@/components/qr-code-generator"
 import { ThemeBackground } from "@/components/animations/theme-background"
-import { MemoryGallery } from "@/components/memory-gallery"
+import { MemoryTimeline } from "@/components/memory-timeline"
 
 interface CouplePageProps {
   params: {
@@ -257,7 +257,7 @@ export default function CouplePage({ params }: CouplePageProps) {
         {/* Memories Gallery */}
         {memories.length > 0 && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
-            <MemoryGallery memories={memories} />
+            <MemoryTimeline memories={memories} />
           </motion.div>
         )}
 
