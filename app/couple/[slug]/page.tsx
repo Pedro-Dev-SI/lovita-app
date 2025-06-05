@@ -200,11 +200,11 @@ export default function CouplePage({ params }: CouplePageProps) {
         </Button>
       </motion.div>
 
-      <div className="relative z-10 container mx-auto px-4 py-8">
+      <div className={`relative z-10 container mx-auto px-4 py-8 ${couplePage.theme_color === 'patodavida' ? 'font-dancing' : ''}`}>
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-block relative">
-            <h1 className={`text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg flex items-center justify-center gap-2 font-dancing ${couplePage.theme_color === 'patodavida' ? 'text-white [text-shadow:0_2px_8px_rgba(30,41,59,0.3)]' : 'text-white'}`}> 
+            <h1 className={`text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg flex items-center justify-center gap-2 ${couplePage.theme_color === 'patodavida' ? 'text-white [text-shadow:0_2px_8px_rgba(30,41,59,0.3)]' : 'text-white'}`}> 
               {couplePage.partner1_name} & {couplePage.partner2_name}
               <motion.span
                 animate={{ scale: [1, 1.3, 1] }}
