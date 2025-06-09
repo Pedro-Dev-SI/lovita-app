@@ -467,6 +467,7 @@ export default function HomePage() {
             </motion.div>
           </motion.div>
           <p className="text-gray-600">© 2025 Lovita. Feito com ❤️ para casais apaixonados.</p>
+          <p className="text-gray-600">Desenvolvido por <a href="https://www.linkedin.com/in/pedro-selvate/" target="_blank" className="text-pink-500 hover:text-pink-600 transition-colors">Pedro Selvate</a></p>
         </div>
       </footer>
     </div>
