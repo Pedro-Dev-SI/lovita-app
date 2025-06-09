@@ -521,7 +521,7 @@ export default function EditPage({ params }: EditPageProps) {
                       onChange={(e) => setFormData({ ...formData, love_story: e.target.value })}
                       placeholder="Conte algo especial, use emojis se quiser! 💖✨"
                       className="border-gray-200 focus:border-pink-500 focus:ring-pink-500 min-h-[80px]"
-                      maxLength={1000}
+                      maxLength={3000}
                     />
                     <button
                       type="button"

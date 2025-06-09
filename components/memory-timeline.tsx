@@ -55,7 +55,7 @@ export function MemoryTimeline({ memories }: MemoryTimelineProps) {
                 <img
                   src={memory.media_url}
                   alt={memory.title || "Memória"}
-                  className="w-full h-56 object-cover rounded-xl mb-4 border"
+                  className="w-full h-[300px] object-cover rounded-xl mb-4 border"
                 />
               )}
               <h4 className="text-lg font-bold text-white mb-1 text-center">{memory.title}</h4>
