@@ -300,7 +300,7 @@ export default function CouplePage({ params }: CouplePageProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
-          className="mt-12 text-center"
+          className="mt-12 text-center flex flex-col items-center"
         >
           <Button
             onClick={() => setShowQR(!showQR)}

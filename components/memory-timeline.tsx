@@ -23,13 +23,20 @@ export function MemoryTimeline({ memories }: MemoryTimelineProps) {
     [memories]
   )
   const [current, setCurrent] = useState(0)
+  const [direction, setDirection] = useState(0) // 1 para next, -1 para prev
 
   if (orderedMemories.length === 0) return null
 
   const memory = orderedMemories[current]
 
-  const goPrev = () => setCurrent((prev) => (prev === 0 ? orderedMemories.length - 1 : prev - 1))
-  const goNext = () => setCurrent((prev) => (prev === orderedMemories.length - 1 ? 0 : prev + 1))
+  const goPrev = () => {
+    setDirection(-1)
+    setCurrent((prev) => (prev === 0 ? orderedMemories.length - 1 : prev - 1))
+  }
+  const goNext = () => {
+    setDirection(1)
+    setCurrent((prev) => (prev === orderedMemories.length - 1 ? 0 : prev + 1))
+  }
 
   return (
     <div className="w-full flex flex-col items-center">
@@ -39,15 +46,15 @@ export function MemoryTimeline({ memories }: MemoryTimelineProps) {
       </div>
       <div className="flex items-center justify-center w-full max-w-2xl">
         <Button onClick={goPrev} variant="ghost" size="icon" className="text-white/80 hover:bg-white/10">
-          <ChevronLeft className="w-8 h-8" />
+          <ChevronLeft className="w-10 h-10" />
         </Button>
         <div className="flex-1 flex justify-center">
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={memory.id}
-              initial={{ opacity: 0, x: 80 }}
+              initial={{ opacity: 0, x: direction === 1 ? 80 : -80 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -80 }}
+              exit={{ opacity: 0, x: direction === 1 ? -80 : 80 }}
               transition={{ duration: 0.4 }}
               className="bg-white/10 backdrop-blur-md rounded-2xl shadow-lg p-6 flex flex-col items-center w-[320px] md:w-[400px] min-h-[420px]"
             >
@@ -67,7 +74,7 @@ export function MemoryTimeline({ memories }: MemoryTimelineProps) {
           </AnimatePresence>
         </div>
         <Button onClick={goNext} variant="ghost" size="icon" className="text-white/80 hover:bg-white/10">
-          <ChevronRight className="w-8 h-8" />
+          <ChevronRight className="w-10 h-10" />
         </Button>
       </div>
       <div className="flex gap-1 mt-4">
