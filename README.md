@@ -297,8 +297,6 @@ npm run dev
 
 **Production URL**: [https://vercel.com/pedrodevsis-projects/v0-casal-micro-saas](https://vercel.com/pedrodevsis-projects/v0-casal-micro-saas)
 
-**Continue building**: [https://v0.dev/chat/projects/G7H6HI9JJ3y](https://v0.dev/chat/projects/G7H6HI9JJ3y)
-
 ---
 
 *Feito com ❤️ para casais apaixonados | © 2025 Lovita*
